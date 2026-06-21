@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="">
+    <title>Calculadora de ISR Mensual y Subsidio 2026</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-hover: #1d4ed8;
+            --background: #f1f5f9;
+            --card-bg: #ffffff;
+            --text: #334155;
+            --border: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--primary);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            box-sizing: border-box;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        #clock-container {
+            text-align: right;
+        }
+
+        #clock {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        #date {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            box-sizing: border-box;
+        }
+
+        .panel {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            flex: 1;
+            box-sizing: border-box;
+        }
+
+        .left-panel {
+            max-width: 450px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .summary-box {
+            margin-top: 25px;
+            border-top: 2px dashed var(--border);
+            padding-top: 20px;
+        }
+
+        .summary-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 1.05rem;
+        }
+
+        .summary-row.total {
+            font-weight: bold;
+            font-size: 1.2rem;
+            border-top: 1px solid var(--border);
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .table-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .highlight {
+            background-color: #fef08a !important;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .left-panel {
+                max-width: 100%;
+            }
+            header {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            #clock-container {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1>Calculadora de ISR Mensual 2026</h1>
+        </div>
+        <div id="clock-container">
+            <div id="clock">00:00:00</div>
+            <div id="date">Cargando fecha...</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- PANEL IZQUIERDO: Entrada y Resumen -->
+        <div class="panel left-panel">
+            <div class="form-group">
+                <label for="ingreso">Ingreso Mensual Gravable ($):</label>
+                <input type="number" id="ingreso" placeholder="Ej. 20000" min="0" step="0.01">
+            </div>
+            <button onclick="calcularISR()">Calcular Impuestos 2026</button>
+
+            <div class="summary-box">
+                <div class="summary-title">Resumen del Cálculo</div>
+                <div class="summary-row">
+                    <span>Ingreso Bruto:</span>
+                    <span id="res-ingreso">$0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>ISR Determinado:</span>
+                    <span id="res-isr-det">$0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Subsidio Aplicado:</span>
+                    <span id="res-subsidio">$0.00</span>
+                </div>
+                <div class="summary-row total">
+                    <span id="label-resultado">Neto a Recibir:</span>
+                    <span id="res-final">$0.00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL DERECHO: Detalle del Proceso -->
+        <div class="panel right-panel">
+            <div class="table-title">Desglose del Procedimiento (Tarifa ISR 2026)</div>
+            <table id="tabla-proceso">
+                <thead>
+                    <tr>
+                        <th>Concepto</th>
+                        <th>Valor / Operación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Ingreso Base</td><td id="proc-ingreso">$0.00</td></tr>
+                    <tr><td>(-) Límite Inferior</td><td id="proc-lim-inf">$0.00</td></tr>
+                    <tr><td>(=) Excedente del Límite Inferior</td><td id="proc-excedente">$0.00</td></tr>
+                    <tr><td>(*) Porcentaje sobre Excedente</td><td id="proc-porcentaje">0.00%</td></tr>
+                    <tr><td>(=) Impuesto Marginal</td><td id="proc-imp-marg">$0.00</td></tr>
+                    <tr><td>(+) Cuota Fija</td><td id="proc-cuota">$0.00</td></tr>
+                    <tr style="background-color: #f8fafc; font-weight: bold;">
+                        <td>(=) ISR Determinado</td>
+                        <td id="proc-isr-det">$0.00</td>
+                    </tr>
+                    <tr><td>(-) Subsidio para el empleo</td><td id="proc-sub-entregar">$0.00</td></tr>
+                    <tr style="background-color: #f1f5f9; font-weight: bold; color: var(--primary);">
+                        <td>Resultado Final</td>
+                        <td id="proc-resultado">$0.00</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="table-title" style="font-size: 1rem; margin-top: 10px;">Referencia oficial: Tarifa Mensual del ISR 2026</div>
+            <div style="overflow-x: auto;">
+                <table id="tabla-tarifa" style="font-size: 0.85rem;">
+                    <thead>
+                        <tr>
+                            <th>Límite Inferior</th>
+                            <th>Límite Superior</th>
+                            <th>Cuota Fija</th>
+                            <th>% Excedente</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Se llena dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Reloj Digital y Fecha del Sistema
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+            
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('date').textContent = now.toLocaleDateString('es-MX', options);
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // TARIFA MENSUAL ISR OFICIAL 2026 (Ajustada por inflación)
+        const tarifaISR2026 = [
+            { limInf: 0.01, limSup: 844.59, cuota: 0.00, pct: 1.92 },
+            { limInf: 844.60, limSup: 7168.51, cuota: 16.22, pct: 6.40 },
+            { limInf: 7168.52, limSup: 12598.02, cuota: 420.95, pct: 10.88 },
+            { limInf: 12598.03, limSup: 14644.64, cuota: 1011.68, pct: 16.00 },
+            { limInf: 14644.65, limSup: 17533.64, cuota: 1339.14, pct: 17.92 },
+            { limInf: 17533.65, limSup: 35362.83, cuota: 1856.84, pct: 21.36 },
+            { limInf: 35362.84, limSup: 55736.68, cuota: 5665.16, pct: 23.52 },
+            { limInf: 55736.69, limSup: 106410.50, cuota: 10457.09, pct: 30.00 },
+            { limInf: 106410.51, limSup: 141880.66, cuota: 25659.23, pct: 32.00 },
+            { limInf: 141880.67, limSup: 425641.99, cuota: 37009.69, pct: 34.00 },
+            { limInf: 425642.00, limSup: Infinity, cuota: 133488.54, pct: 35.00 }
+        ];
+
+        // LÓGICA DEL SUBSIDIO PARA EL EMPLEO 2026
+        // Beneficio fijo de $535.65 mensuales para quienes ganan hasta $11,492.66
+        function calcularSubsidio2026(ingreso) {
+            if (ingreso > 0 && ingreso <= 11492.66) {
+                return 535.65;
+            }
+            return 0.00;
+        }
+
+        // Renderizar tabla de referencia al iniciar
+        const tbodyTarifa = document.querySelector('#tabla-tarifa tbody');
+        tarifaISR2026.forEach((r, index) => {
+            const tr = document.createElement('tr');
+            tr.id = `fila-tarifa-${index}`;
+            tr.innerHTML = `
+                <td>$${r.limInf.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                <td>${r.limSup === Infinity ? 'En adelante' : '$' + r.limSup.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                <td>$${r.cuota.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                <td>${r.pct}%</td>
+            `;
+            tbodyTarifa.appendChild(tr);
+        });
+
+        // Función de cálculo
+        function calcularISR() {
+            const ingreso = parseFloat(document.getElementById('ingreso').value);
+
+            if (isNaN(ingreso) || ingreso <= 0) {
+                alert("Por favor, ingrese un monto válido mayor a 0.");
+                return;
+            }
+
+            // Limpiar estilos previos
+            tarifaISR2026.forEach((_, index) => {
+                document.getElementById(`fila-tarifa-${index}`).classList.remove('highlight');
+            });
+
+            // Encontrar renglón de la tarifa 2026
+            let renglon = tarifaISR2026.find(r => ingreso >= r.limInf && ingreso <= r.limSup);
+            let renglonIndex = tarifaISR2026.indexOf(renglon);
+            
+            if(renglonIndex !== -1) {
+                document.getElementById(`fila-tarifa-${renglonIndex}`).classList.add('highlight');
+            }
+
+            // Operaciones matemáticas de impuestos
+            const limInferior = renglon.limInf;
+            const excedente = ingreso - limInferior;
+            const porcentaje = renglon.pct / 100;
+            const impuestoMarginal = excedente * porcentaje;
+            const cuotaFija = renglon.cuota;
+            const isrDeterminado = impuestoMarginal + cuotaFija;
+            const subsidio = calcularSubsidio2026(ingreso);
+            
+            let resultadoFinal = isrDeterminado - subsidio;
+            let tipoResultado = "";
+            let neto = 0;
+
+            if (resultadoFinal > 0) {
+                tipoResultado = "ISR a Retener";
+                neto = ingreso - resultadoFinal;
+            } else {
+                tipoResultado = "Subsidio a Entregar";
+                resultadoFinal = Math.abs(resultadoFinal);
+                neto = ingreso + resultadoFinal;
+            }
+
+            const f = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
+
+            // Rellenar desglose a la derecha
+            document.getElementById('proc-ingreso').textContent = f.format(ingreso);
+            document.getElementById('proc-lim-inf').textContent = f.format(limInferior);
+            document.getElementById('proc-excedente').textContent = f.format(excedente);
+            document.getElementById('proc-porcentaje').textContent = `${renglon.pct}%`;
+            document.getElementById('proc-imp-marg').textContent = f.format(impuestoMarginal);
+            document.getElementById('proc-cuota').textContent = f.format(cuotaFija);
+            document.getElementById('proc-isr-det').textContent = f.format(isrDeterminado);
+            document.getElementById('proc-sub-entregar').textContent = f.format(subsidio);
+            document.getElementById('proc-resultado').textContent = `${tipoResultado}: ${f.format(resultadoFinal)}`;
+
+            // Rellenar resumen a la izquierda
+            document.getElementById('res-ingreso').textContent = f.format(ingreso);
+            document.getElementById('res-isr-det').textContent = f.format(isrDeterminado);
+            document.getElementById('res-subsidio').textContent = f.format(subsidio);
+            
+            document.getElementById('label-resultado').textContent = tipoResultado === "ISR a Retener" ? "Neto a Recibir:" : "Total a Recibir (con Subsidio):";
+            document.getElementById('res-final').textContent = f.format(neto);
+        }
+    </script>
+</body>
+</html>
